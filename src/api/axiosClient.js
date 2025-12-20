@@ -8,18 +8,6 @@ const axiosClient = axios.create({
   },
 });
 
-// // Tự động thêm Token vào header nếu có
-// axiosClient.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("access_token");
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
-
 // Tự động thêm Token vào header nếu có
 axiosClient.interceptors.request.use(
   (config) => {

@@ -9,7 +9,7 @@ import HomePage from "../pages/HomePage";
 import SchedulePage from "../pages/SchedulePage";
 import BookingPage from "../pages/BookingPage";
 import BookingSuccessPage from "../pages/BookingSuccessPage";
-
+import ChangePasswordPage from "../pages/ChangePasswordPage";
 // ADMIN
 import AdminLayout from "../components/Layout/AdminLayout";
 import AdminRoute from "../components/common/AdminRoute";
@@ -52,7 +52,16 @@ const AppRouter = () => {
           </MainLayout>
         }
       />
-
+      <Route
+        path="/change-password"
+        element={
+          <MainLayout>
+            <ProtectedRoute>
+              <ChangePasswordPage />
+            </ProtectedRoute>
+          </MainLayout>
+        }
+      />
       {/* Trang thông báo đặt vé thành công */}
       <Route path="/booking-success" element={<BookingSuccessPage />} />
 
