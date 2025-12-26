@@ -53,12 +53,12 @@ const BookingSuccessPage = () => {
         >
           ← Về trang chủ
         </button>
-        <button
+        {/* <button
           onClick={() => window.print()}
           className="bg-orange-600 text-white px-6 py-2 rounded shadow hover:bg-orange-700 font-bold flex items-center gap-2"
         >
           🖨️ IN VÉ / LƯU PDF
-        </button>
+        </button> */}
       </div>
 
       <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-xl border-t-8 border-orange-600 print:shadow-none print:border-2 print:w-full">

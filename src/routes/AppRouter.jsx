@@ -10,6 +10,8 @@ import SchedulePage from "../pages/SchedulePage";
 import BookingPage from "../pages/BookingPage";
 import BookingSuccessPage from "../pages/BookingSuccessPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage";
+import ContactPage from "../pages/ContactPage";
+import MyTicketPage from "../pages/MyTicketPage";
 // ADMIN
 import AdminLayout from "../components/Layout/AdminLayout";
 import AdminRoute from "../components/common/AdminRoute";
@@ -59,6 +61,25 @@ const AppRouter = () => {
             <ProtectedRoute>
               <ChangePasswordPage />
             </ProtectedRoute>
+          </MainLayout>
+        }
+      />
+      {/* Route Vé của tôi (Cần đăng nhập) */}
+      <Route
+        path="/my-ticket"
+        element={
+          <MainLayout>
+            <ProtectedRoute>
+              <MyTicketPage />
+            </ProtectedRoute>
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/contact"
+        element={
+          <MainLayout>
+            <ContactPage />
           </MainLayout>
         }
       />

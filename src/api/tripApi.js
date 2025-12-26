@@ -10,13 +10,11 @@ const tripApi = {
     const url = "/trips";
     return axiosClient.get(url, { params });
   },
-
   // Lấy chi tiết 1 chuyến xe (Admin dùng để sửa, User dùng để xem trước khi đặt)
   get(id) {
     const url = `/trips/${id}`;
     return axiosClient.get(url);
   },
-
   // =================================================
   // 2. CÁC HÀM DÀNH RIÊNG CHO ADMIN (Quản lý)
   // =================================================
@@ -26,13 +24,11 @@ const tripApi = {
     const url = "/trips";
     return axiosClient.post(url, data);
   },
-
   // Cập nhật chuyến xe
   update(id, data) {
     const url = `/trips/${id}`;
     return axiosClient.put(url, data);
   },
-
   // Xóa chuyến xe
   delete(id) {
     const url = `/trips/${id}`;

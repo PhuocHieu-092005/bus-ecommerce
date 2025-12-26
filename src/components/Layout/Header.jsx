@@ -1,74 +1,174 @@
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  // 🔥 Lấy user và hàm logout từ Context
   const { user, logout } = useAuth();
 
+  // State để kiểm tra xem người dùng đã cuộn trang chưa
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  // Bắt sự kiện cuộn chuột
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleLogout = () => {
-    logout(); // Gọi hàm logout từ context
+    logout();
     navigate("/login");
   };
 
-  const navLinkClass = (path) => {
-    const isActive = location.pathname === path;
-    return `font-bold text-sm uppercase px-4 py-4 transition-all border-b-2 ${
-      isActive
-        ? "text-red-600 border-red-600"
-        : "text-gray-600 border-transparent hover:text-red-600"
-    }`;
-  };
+  // Class động dựa trên trạng thái cuộn
+  // Nếu ở đầu trang (chưa cuộn) và đang ở trang chủ: Nền trong suốt, chữ trắng
+  // Nếu đã cuộn hoặc không phải trang chủ: Nền trắng, chữ đen, có bóng đổ
+  const isHomePage = location.pathname === "/";
+
+  const headerClass = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
+    isScrolled || !isHomePage
+      ? "bg-white/95 backdrop-blur-md shadow-md py-2 text-gray-800"
+      : "bg-transparent py-4 text-white"
+  }`;
+
+  const logoTextClass =
+    isScrolled || !isHomePage ? "text-orange-600" : "text-white";
+  const navLinkClass =
+    isScrolled || !isHomePage
+      ? "text-gray-600 hover:text-orange-600"
+      : "text-white/90 hover:text-white hover:bg-white/10";
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50 border-b border-gray-100">
-      <div className="container mx-auto px-4 h-20 flex justify-between items-center">
-        {/* LOGO */}
+    <header className={headerClass}>
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        {/* --- LOGO --- */}
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg group-hover:bg-orange-700 transition">
-            TH
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl shadow-lg transition-transform group-hover:scale-110 ${
+              isScrolled || !isHomePage
+                ? "bg-orange-600 text-white"
+                : "bg-white text-orange-600"
+            }`}
+          >
+            V
           </div>
-          <span className="text-orange-600 font-extrabold text-xl tracking-tighter uppercase group-hover:text-orange-700 transition">
-            BUS VIP
-          </span>
+          <div className="flex flex-col">
+            <span
+              className={`font-extrabold text-xl tracking-tighter uppercase leading-none ${logoTextClass}`}
+            >
+              BUS VIP
+            </span>
+            <span
+              className={`text-[10px] font-medium tracking-widest ${
+                isScrolled || !isHomePage ? "text-gray-500" : "text-white/80"
+              }`}
+            >
+              LINES
+            </span>
+          </div>
         </Link>
 
-        {/* MENU */}
-        <nav className="hidden md:flex items-center gap-2">
-          <Link to="/" className={navLinkClass("/")}>
-            Trang chủ
-          </Link>
-          <Link to="/schedule" className={navLinkClass("/schedule")}>
-            Lịch trình
-          </Link>
-          <Link to="/contact" className={navLinkClass("/contact")}>
-            Liên hệ
-          </Link>
-          <Link to="/my-ticket" className={navLinkClass("/my-ticket")}>
-            Vé của tôi
-          </Link>
+        {/* --- MENU GIỮA --- */}
+        <nav className="hidden md:flex items-center gap-1">
+          {[
+            { path: "/", label: "Trang chủ", icon: "🏠" },
+            { path: "/schedule", label: "Lịch trình", icon: "📅" },
+            { path: "/contact", label: "Liên hệ", icon: "📞" },
+            { path: "/my-ticket", label: "Vé của tôi", icon: "🎟️" },
+          ].map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${navLinkClass} ${
+                location.pathname === link.path
+                  ? "bg-orange-600 !text-white shadow-orange-500/50 shadow-lg"
+                  : ""
+              }`}
+            >
+              <span>{link.label}</span>
+            </Link>
+          ))}
         </nav>
 
-        {/* USER BUTTONS - TỰ ĐỘNG CẬP NHẬT */}
-        <div className="flex items-center gap-3">
-          {user ? ( // 🔥 Kiểm tra biến user từ context
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700 hidden lg:block">
-                Chào, {user.name || "Khách"}!
-              </span>
+        {/* --- USER / LOGIN --- */}
+        <div className="flex items-center gap-4">
+          {user ? (
+            <div className="relative">
               <button
-                onClick={handleLogout}
-                className="border border-red-500 text-red-600 px-4 py-1.5 rounded-full font-bold text-xs hover:bg-red-50 transition"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className={`flex items-center gap-2 font-bold px-4 py-2 rounded-full border transition-all ${
+                  isScrolled || !isHomePage
+                    ? "border-gray-200 hover:bg-gray-50 text-gray-700"
+                    : "border-white/30 bg-black/20 text-white hover:bg-black/30"
+                }`}
               >
-                Đăng xuất
+                <span>👤 {user.full_name || user.name || "Khách hàng"}</span>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
+                </svg>
               </button>
+
+              {/* Dropdown Menu */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl py-2 border border-gray-100 animate-fade-in-up origin-top-right text-gray-800">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm text-gray-500">Đăng nhập với</p>
+                    <p className="font-bold truncate">{user.email}</p>
+                  </div>
+
+                  {user.role === "admin" && (
+                    <Link
+                      to="/admin/dashboard"
+                      className="block px-4 py-2 hover:bg-orange-50 hover:text-orange-600 transition"
+                    >
+                      ⚡ Trang quản trị
+                    </Link>
+                  )}
+
+                  <Link
+                    to="/change-password"
+                    class="block px-4 py-2 hover:bg-orange-50 hover:text-orange-600 transition"
+                  >
+                    🔒 Đổi mật khẩu
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition font-medium"
+                  >
+                    🚪 Đăng xuất
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <Link
               to="/login"
-              className="bg-orange-600 text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-orange-700 transition shadow-sm"
+              className={`px-6 py-2.5 rounded-full font-bold text-sm shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 ${
+                isScrolled || !isHomePage
+                  ? "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-500/30"
+                  : "bg-white text-orange-600 hover:bg-gray-100"
+              }`}
             >
               Đăng nhập
             </Link>

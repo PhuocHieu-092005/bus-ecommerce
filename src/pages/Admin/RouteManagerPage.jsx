@@ -4,12 +4,19 @@ import RouteTable from "../../components/Admin/Route/RouteTable";
 import RouteModal from "../../components/Admin/Route/RouteModal";
 import { toast } from "react-toastify";
 import axios from "axios";
-
+import Pagination from "../../components/common/Pagination";
 const RouteManagerPage = () => {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
+
+  // --- THÊM STATE PHÂN TRANG ---
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    total: 0,
+  });
 
   const fetchRoutes = async () => {
     try {
@@ -21,18 +28,6 @@ const RouteManagerPage = () => {
       setLoading(false);
     }
   };
-  // const fetchRoutes = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await axios.get("https://hoaitam123.xyz/routes");
-  //     setRoutes(res.data?.data || res.data || []);
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error("Lỗi tải danh sách tuyến đường");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   useEffect(() => {
     fetchRoutes();
