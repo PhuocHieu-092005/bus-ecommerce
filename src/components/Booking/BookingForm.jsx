@@ -69,37 +69,6 @@ const BookingForm = ({
         </label>
 
         <div className="space-y-3">
-          {/* Tiền mặt */}
-          <label
-            className={`flex items-center p-3 border rounded cursor-pointer transition-all ${
-              passengerInfo.payment_method === "cash"
-                ? "border-orange-500 bg-orange-50"
-                : "hover:bg-gray-50"
-            }`}
-          >
-            <input
-              type="radio"
-              name="payment"
-              value="cash"
-              checked={passengerInfo.payment_method === "cash"}
-              onChange={(e) =>
-                onInfoChange({
-                  ...passengerInfo,
-                  payment_method: e.target.value,
-                })
-              }
-              className="w-4 h-4 text-orange-600 focus:ring-orange-500 accent-orange-600"
-            />
-            <div className="ml-3">
-              <span className="block font-medium text-gray-800">
-                Thanh toán tại nhà xe
-              </span>
-              <span className="block text-xs text-gray-500">
-                Thanh toán tiền mặt khi lên xe
-              </span>
-            </div>
-          </label>
-
           {/* Chuyển khoản */}
           <label
             className={`flex items-center p-3 border rounded cursor-pointer transition-all ${

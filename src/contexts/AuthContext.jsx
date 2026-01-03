@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Tính toán biến này để AdminRoute dùng
-  const isAuthenticated = !!user;
+  const isAuthenticated = !!user; //!! check user có data -> true, null -> false
 
   return (
     // THÊM isAuthenticated VÀO ĐÂY

@@ -6,15 +6,15 @@ import { toast } from "react-toastify";
 const MyTicketPage = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?.id;
 
   useEffect(() => {
     const fetchMyTickets = async () => {
       try {
         setLoading(true);
-        // Gọi API lấy danh sách vé (Backend tự lọc theo User đang đăng nhập)
-        const res = await bookingApi.getAll();
-        // Xử lý dữ liệu trả về (thường nằm trong res.data.data do có phân trang)
-        const list = res.data?.data || res.data || [];
+        const res = await bookingApi.getBookingUser(userId);
+        const list = res.data?.data;
         setTickets(list);
       } catch (error) {
         console.error("Lỗi tải vé:", error);
@@ -96,7 +96,7 @@ const MyTicketPage = () => {
                   <div>
                     <span className="text-gray-500 text-sm mr-2">Mã vé:</span>
                     <span className="font-mono font-bold text-orange-600 text-lg">
-                      {ticket.booking_code || `#${ticket.id}`}
+                      {ticket.booking_code}
                     </span>
                   </div>
                   <div>
@@ -212,7 +212,8 @@ const MyTicketPage = () => {
                     {/* Nút tải hóa đơn (Chỉ hiện khi đã thanh toán và có Invoice ID) */}
                     {ticket.payment_status === "paid" && ticket.invoice && (
                       <a
-                        href={`http://hoaitam123.xyz/index.php/invoices/${ticket.invoice.id}/download`}
+                        // href={`http://hoaitam123.xyz/index.php/invoices/${ticket.invoice.id}/download`}
+                        href={`https://alec-vicegeral-exuberantly.ngrok-free.dev/invoices/${ticket.invoice.id}/download`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-4 w-full block text-center bg-white border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-100 transition text-sm font-medium"
