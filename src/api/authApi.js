@@ -6,11 +6,15 @@ const authApi = {
     return axiosClient.post(url, data);
   },
   register(data) {
-    const url = "/register";
-    return axiosClient.post(url, data);
+    return axiosClient.post("/register", data);
   },
-  changePassword(data) {
-    return axiosClient.post("/change-password", data);
+  // --- SỬA DÒNG NÀY: Thêm tham số id ---
+  changePassword(id, data) {
+    return axiosClient.post(`/change-password`, data);
+  },
+  // -------------------------------------
+  resetPassword(email) {
+    return axiosClient.post("/reset-password", { email });
   },
 };
 

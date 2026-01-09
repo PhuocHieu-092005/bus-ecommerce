@@ -212,8 +212,8 @@ const MyTicketPage = () => {
                     {/* Nút tải hóa đơn (Chỉ hiện khi đã thanh toán và có Invoice ID) */}
                     {ticket.payment_status === "paid" && ticket.invoice && (
                       <a
-                        // href={`http://hoaitam123.xyz/index.php/invoices/${ticket.invoice.id}/download`}
-                        href={`https://alec-vicegeral-exuberantly.ngrok-free.dev/invoices/${ticket.invoice.id}/download`}
+                        href={`http://hoaitam123.xyz/invoices/${ticket.invoice.id}/download`}
+                        // href={`https://alec-vicegeral-exuberantly.ngrok-free.dev/invoices/${ticket.invoice.id}/download`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-4 w-full block text-center bg-white border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-100 transition text-sm font-medium"

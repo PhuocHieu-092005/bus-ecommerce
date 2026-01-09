@@ -2,8 +2,8 @@ import axios from "axios";
 
 const axiosClient = axios.create({
   // baseURL: " http://127.0.0.1:8000",
-  baseURL: "https://alec-vicegeral-exuberantly.ngrok-free.dev",
-  // baseURL: "https://hoaitam123.xyz",
+  // baseURL: "https://alec-vicegeral-exuberantly.ngrok-free.dev",
+  baseURL: "https://hoaitam123.xyz",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

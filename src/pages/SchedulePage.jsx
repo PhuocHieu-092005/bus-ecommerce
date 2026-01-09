@@ -69,7 +69,7 @@ const SchedulePage = () => {
     : "Các tuyến đường phổ biến";
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-20 mt-[50px]">
       {/* Banner */}
       <div className="bg-orange-600 py-10 text-white text-center">
         <h1 className="text-3xl font-bold uppercase">Tra cứu lịch trình</h1>

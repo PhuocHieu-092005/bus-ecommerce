@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
 import authApi from "../api/authApi";
+import { useAuth } from "../contexts/AuthContext"; // Import AuthContext
 
-// Dùng chung hình nền cho đẹp
 import bgImage from "../assets/bus-bg.png";
 
 const ChangePasswordPage = () => {
@@ -17,31 +17,50 @@ const ChangePasswordPage = () => {
   } = useForm();
 
   const navigate = useNavigate();
+  const { user } = useAuth(); // Lấy thông tin User đang đăng nhập
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
-  // Theo dõi giá trị mật khẩu mới để kiểm tra khớp lệnh
   const newPassword = watch("new_password");
 
   const onSubmit = async (data) => {
+    // Kiểm tra xem có user ID chưa
+    if (!user || !user.id) {
+      toast.error(
+        "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!"
+      );
+      return;
+    }
+
     try {
       setLoading(true);
 
-      // Gọi API đổi mật khẩu
-      await authApi.changePassword({
+      // --- SỬA ĐOẠN NÀY: Truyền user.id vào tham số đầu tiên ---
+      await authApi.changePassword(user.id, {
         current_password: data.current_password,
         new_password: data.new_password,
       });
+      // --------------------------------------------------------
 
-      toast.success("Đổi mật khẩu thành công!");
-      reset(); // Xóa trắng form
-      navigate("/"); // Về trang chủ hoặc trang profile
+      toast.success("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+      reset();
+      navigate("/login");
     } catch (error) {
       console.error(error);
+      // Hiển thị lỗi chi tiết từ Backend (nếu có)
       const message =
         error.response?.data?.message ||
         "Đổi mật khẩu thất bại! Kiểm tra lại mật khẩu cũ.";
-      toast.error(message);
+
+      // Nếu có lỗi validation (ví dụ mật khẩu ngắn quá)
+      if (error.response?.data?.errors) {
+        const errorDetails = Object.values(error.response.data.errors)
+          .flat()
+          .join(", ");
+        toast.error(errorDetails);
+      } else {
+        toast.error(message);
+      }
     } finally {
       setLoading(false);
     }

@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import authApi from "../api/authApi";
 import { useAuth } from "../contexts/AuthContext";
 
-// Bạn nhớ kiểm tra tên file ảnh trong thư mục assets là .png hay .jpg nhé
 import bgImage from "../assets/bus-bg.png";
 
 const LoginPage = () => {
@@ -18,16 +17,19 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
-
-  // State quản lý ẩn/hiện mật khẩu
   const [showPassword, setShowPassword] = useState(false);
 
+  // --- STATE CHO MODAL QUÊN MẬT KHẨU ---
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
+
+  // Xử lý Đăng nhập
   const onSubmit = async (data) => {
     try {
       setLoading(true);
       const res = await authApi.login(data);
 
-      // Lấy dữ liệu an toàn
       const userData = res.data?.data?.user || res.data?.user;
       const token = res.data?.data?.access_token || res.data?.access_token;
 
@@ -35,12 +37,9 @@ const LoginPage = () => {
         throw new Error("Dữ liệu không hợp lệ");
       }
 
-      // 1. Lưu vào Context
       login(token, userData);
-
       toast.success("Đăng nhập thành công!");
 
-      // 2. Chuyển trang (Sử dụng window.location để đảm bảo Admin nhận quyền ngay)
       if (userData?.role === "admin") {
         window.location.href = "/admin/dashboard";
       } else {
@@ -55,24 +54,39 @@ const LoginPage = () => {
     }
   };
 
-  // --- HÀM XỬ LÝ KHI BẤM QUÊN MẬT KHẨU ---
-  const handleForgotPassword = (e) => {
+  // --- XỬ LÝ GỬI YÊU CẦU QUÊN MẬT KHẨU ---
+  const handleResetPassword = async (e) => {
     e.preventDefault();
-    // Vì chưa có API gửi mail reset, ta thông báo cho người dùng
-    toast.info("Vui lòng liên hệ Hotline 1900 xxxx để được cấp lại mật khẩu!");
+    if (!forgotEmail) return toast.warning("Vui lòng nhập Email!");
+
+    try {
+      setIsResetting(true);
+      // Gọi API reset password
+      await authApi.resetPassword(forgotEmail);
+
+      toast.success("Mật khẩu mới đã được gửi vào Email của bạn!");
+      setIsForgotModalOpen(false); // Đóng modal
+      setForgotEmail(""); // Xóa email đã nhập
+    } catch (error) {
+      console.error(error);
+      const message =
+        error.response?.data?.message ||
+        "Không tìm thấy Email này trong hệ thống.";
+      toast.error(message);
+    } finally {
+      setIsResetting(false);
+    }
   };
-  // ---------------------------------------
 
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
-      {/* Lớp phủ màu đen mờ để chữ dễ đọc hơn */}
       <div className="absolute inset-0 bg-black/40"></div>
 
       <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-center md:justify-between h-full max-w-6xl">
-        {/* PHẦN CHỮ BÊN TRÁI (Slogan) */}
+        {/* Slogan bên trái */}
         <div className="hidden md:block text-white w-1/2 pr-10">
           <h1 className="text-6xl font-serif font-bold leading-tight mb-4 drop-shadow-lg">
             Hành <br /> Trình Việt
@@ -83,12 +97,10 @@ const LoginPage = () => {
           </p>
         </div>
 
-        {/* PHẦN FORM BÊN PHẢI */}
-        <div className="w-full md:w-[420px] bg-[#fdfdf9] rounded-[2.5rem] shadow-2xl p-8 md:p-10 border border-gray-200/50 backdrop-blur-sm">
-          {/* Header Form */}
+        {/* Form Đăng nhập bên phải */}
+        <div className="w-full md:w-[420px] bg-[#fdfdf9] rounded-[2.5rem] shadow-2xl p-8 md:p-10 border border-gray-200/50 backdrop-blur-sm relative">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-3">
-              {/* Icon Xe Buýt Xanh */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-12 w-12 text-[#2f5d41]"
@@ -107,12 +119,12 @@ const LoginPage = () => {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Email Input */}
+            {/* Email */}
             <div>
               <input
                 type="email"
                 {...register("email", { required: "Vui lòng nhập Email" })}
-                className="w-full border border-gray-300 bg-white rounded-xl px-4 py-3.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#c05621] focus:border-transparent transition shadow-sm"
+                className="w-full border border-gray-300 bg-white rounded-xl px-4 py-3.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#c05621] transition shadow-sm"
                 placeholder="Email của bạn"
               />
               {errors.email && (
@@ -122,14 +134,14 @@ const LoginPage = () => {
               )}
             </div>
 
-            {/* Password Input (Có nút mắt) */}
+            {/* Password */}
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 {...register("password", {
                   required: "Vui lòng nhập Mật khẩu",
                 })}
-                className="w-full border border-gray-300 bg-white rounded-xl px-4 py-3.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#c05621] focus:border-transparent transition shadow-sm"
+                className="w-full border border-gray-300 bg-white rounded-xl px-4 py-3.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#c05621] transition shadow-sm"
                 placeholder="Mật khẩu"
               />
               <button
@@ -194,17 +206,15 @@ const LoginPage = () => {
             </button>
           </form>
 
-          {/* Footer Links */}
           <div className="mt-8 flex justify-between items-center text-sm font-medium">
-            {/* --- SỬA CHỖ NÀY: Dùng button để hiện thông báo --- */}
+            {/* Nút mở Modal Quên mật khẩu */}
             <button
               type="button"
-              onClick={handleForgotPassword}
-              className="text-gray-500 hover:text-[#c05621] transition focus:outline-none"
+              onClick={() => setIsForgotModalOpen(true)}
+              className="text-gray-500 hover:text-[#c05621] transition focus:outline-none hover:underline"
             >
               Quên mật khẩu?
             </button>
-            {/* ------------------------------------------------ */}
 
             <Link
               to="/register"
@@ -238,6 +248,69 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+
+      {/* --- MODAL QUÊN MẬT KHẨU --- */}
+      {isForgotModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in-up">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800">
+                Quên mật khẩu?
+              </h3>
+              <p className="text-gray-500 text-sm mt-2">
+                Nhập email của bạn, chúng tôi sẽ gửi mật khẩu mới cho bạn.
+              </p>
+            </div>
+
+            <form onSubmit={handleResetPassword}>
+              <input
+                type="email"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none mb-4"
+                placeholder="Nhập email đăng ký..."
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                required
+              />
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsForgotModalOpen(false)}
+                  className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isResetting}
+                  className={`flex-1 py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition ${
+                    isResetting ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {isResetting ? "Đang gửi..." : "Gửi yêu cầu"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* --------------------------- */}
     </div>
   );
 };
