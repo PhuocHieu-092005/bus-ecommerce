@@ -6,7 +6,7 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Lấy các thông tin PayOS trả về trên URL (nếu cần hiển thị)
+  // Lấy các thông tin PayOS trả về trên URL
   const orderCode = searchParams.get("orderCode");
 
   useEffect(() => {

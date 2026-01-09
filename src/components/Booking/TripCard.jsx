@@ -1,7 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
-// 1. KHO ẢNH (Dùng link Wikimedia ổn định, không lo chết link)
 const cityImages = {
   "TP HCM":
     "https://res.cloudinary.com/dbemi1ljd/image/upload/v1766659240/bus_tphcm_priwlr.png",

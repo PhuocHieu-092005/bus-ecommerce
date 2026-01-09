@@ -21,8 +21,6 @@ axiosClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
 
       // LOG KIỂM TRA: In ra console để xem token đã được lấy và gán chưa
-      // console.log("✅ [Axios] Token attached:", token);
-      // console.log("✅ [Axios] Headers:", config.headers);
     } else {
       console.warn("⚠️ [Axios] No token found in localStorage");
     }

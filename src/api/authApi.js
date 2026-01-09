@@ -2,7 +2,7 @@ import axiosClient from "./axiosClient";
 
 const authApi = {
   login(data) {
-    const url = "/login"; // Đường dẫn API login của server (Tâm làm)
+    const url = "/login"; // Đường dẫn API login của server
     return axiosClient.post(url, data);
   },
   register(data) {

@@ -3,7 +3,7 @@ import React, { useState, useMemo } from "react";
 const SeatSelector = ({ seats, bookedSeats, selectedSeats, onSelect }) => {
   const [activeFloor, setActiveFloor] = useState(1); // 1: Tầng dưới, 2: Tầng trên
 
-  // Chia tầng (giữ nguyên logic cũ của bạn)
+  // Chia tầng
   const { lowerFloorSeats, upperFloorSeats } = useMemo(() => {
     const hasFloorInfo = seats.some((s) => s.floor);
 
@@ -28,8 +28,7 @@ const SeatSelector = ({ seats, bookedSeats, selectedSeats, onSelect }) => {
   const currentSeats = activeFloor === 1 ? lowerFloorSeats : upperFloorSeats;
 
   /**
-   * ==========================
-   * CHỈ SỬA LAYOUT Ở ĐÂY
+   * =========================
    * Group ghế theo hàng A, B, C...
    * ==========================
    */
@@ -89,7 +88,7 @@ const SeatSelector = ({ seats, bookedSeats, selectedSeats, onSelect }) => {
         </button>
       </div>
 
-      {/* ===== SƠ ĐỒ GHẾ (LAYOUT ĐÃ FIX) ===== */}
+      {/* ===== SƠ ĐỒ GHẾ */}
       {Object.keys(seatRows).length > 0 ? (
         <div className="flex flex-col gap-4 items-center">
           {Object.entries(seatRows).map(([row, seatsInRow]) => (

@@ -5,16 +5,15 @@ import tripApi from "../../api/tripApi";
 const SearchForm = ({ onSearch }) => {
   const [locations, setLocations] = useState([]);
 
-  // 🔥 FIX: Đổi tên state cho giống hệt Postman API của Tâm
   const [searchData, setSearchData] = useState({
-    from_city: "", // Cũ là: departure_location
-    to_city: "", // Cũ là: arrival_location
-    departure_date: "", // Cũ là: departure_time
+    from_city: "",
+    to_city: "",
+    departure_date: "",
     return_date: "",
     trip_type: "one_way",
   });
 
-  // Logic lấy địa điểm (Giữ nguyên vì đã chạy tốt)
+  // Logic lấy địa điểm
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -40,7 +39,7 @@ const SearchForm = ({ onSearch }) => {
           setLocations([...uniqueLocs]);
         }
       } catch (error) {
-        console.error("❌ Lỗi gọi API:", error);
+        console.error(" Lỗi gọi API:", error);
       }
     };
     fetchLocations();
@@ -66,8 +65,6 @@ const SearchForm = ({ onSearch }) => {
       toast.warning("Vui lòng chọn ngày về!");
       return;
     }
-
-    // 2. 🔥 FIX LỖI 422: Làm sạch dữ liệu trước khi gửi
     // Tạo một bản sao để chỉnh sửa
     const payload = { ...searchData };
 
@@ -122,7 +119,7 @@ const SearchForm = ({ onSearch }) => {
             Điểm đi
           </label>
           <select
-            name="from_city" // 🔥 Sửa name
+            name="from_city"
             className="w-full border border-gray-300 p-3 rounded font-medium focus:ring-2 focus:ring-orange-400 outline-none bg-white text-gray-800"
             onChange={handleChange}
             value={searchData.from_city}
@@ -142,7 +139,7 @@ const SearchForm = ({ onSearch }) => {
             Điểm đến
           </label>
           <select
-            name="to_city" // 🔥 Sửa name
+            name="to_city"
             className="w-full border border-gray-300 p-3 rounded font-medium focus:ring-2 focus:ring-orange-400 outline-none bg-white text-gray-800"
             onChange={handleChange}
             value={searchData.to_city}
