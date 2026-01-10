@@ -1,103 +1,134 @@
 import React, { useEffect, useState } from "react";
 import busApi from "../../api/busApi";
 import BusTable from "../../components/Admin/Bus/BusTable";
-import BusModal from "../../components/Admin/Bus/BusModal"; // Import Modal vừa tạo
+import BusModal from "../../components/Admin/Bus/BusModal";
+import Pagination from "../../components/common/Pagination"; // 👇 Import Pagination
 import { toast } from "react-toastify";
 
 const BusManagerPage = () => {
   const [buses, setBuses] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // State quản lý Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBus, setSelectedBus] = useState(null); // Lưu xe đang sửa (nếu có)
+  const [selectedBus, setSelectedBus] = useState(null);
 
-  // 1. Lấy danh sách xe
+  // 👇 State phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const fetchBuses = async () => {
+    setLoading(true);
     try {
-      const res = await busApi.getAll();
-      setBuses(res.data?.data || res.data || []);
+      // 👇 Truyền page vào API
+      const res = await busApi.getAll({ page: currentPage });
+
+      let busList = [];
+      let total = 1;
+
+      // Xử lý dữ liệu trả về (tương tự các phần trước)
+      if (res.data && Array.isArray(res.data)) {
+        busList = res.data;
+        total = res.last_page || 1;
+      } else if (res.data?.data && Array.isArray(res.data.data)) {
+        busList = res.data.data;
+        total = res.data.last_page || 1;
+      } else if (Array.isArray(res)) {
+        busList = res;
+      }
+
+      setBuses(busList);
+      setTotalPages(total);
     } catch (error) {
+      console.error(error);
       toast.error("Lỗi tải danh sách xe");
+      setBuses([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // 👇 Chạy lại khi currentPage thay đổi
   useEffect(() => {
     fetchBuses();
-  }, []);
+  }, [currentPage]);
 
-  // 2. Xử lý Xóa xe
   const handleDelete = async (id) => {
-    if (
-      window.confirm(
-        "Bạn có chắc muốn xóa xe này? Hành động này không thể hoàn tác."
-      )
-    ) {
+    if (window.confirm("Bạn có chắc muốn xóa xe này?")) {
       try {
         await busApi.delete(id);
         toast.success("Xóa thành công");
-        fetchBuses(); // Tải lại danh sách
+        fetchBuses();
       } catch (error) {
         toast.error("Xóa thất bại (Có thể xe đang có chuyến chạy)");
       }
     }
   };
 
-  // 3. Mở Modal Thêm mới
   const handleAdd = () => {
-    setSelectedBus(null); // Không có dữ liệu cũ
+    setSelectedBus(null);
     setIsModalOpen(true);
   };
 
-  // 4. Mở Modal Sửa
   const handleEdit = (bus) => {
-    setSelectedBus(bus); // Gán dữ liệu xe cần sửa
+    setSelectedBus(bus);
     setIsModalOpen(true);
   };
 
-  // 5. Xử lý Lưu (Gọi API Thêm hoặc Sửa)
   const handleSave = async (formData) => {
     try {
       if (selectedBus) {
-        // --- Logic CẬP NHẬT ---
         await busApi.update(selectedBus.id, formData);
         toast.success("Cập nhật xe thành công!");
       } else {
-        // --- Logic THÊM MỚI ---
         await busApi.create(formData);
         toast.success("Thêm xe mới thành công!");
       }
-
-      setIsModalOpen(false); // Đóng modal
-      fetchBuses(); // Tải lại danh sách mới nhất
+      setIsModalOpen(false);
+      fetchBuses();
     } catch (error) {
       console.error(error);
-      const message = error.response?.data?.message || "Có lỗi xảy ra!";
-      toast.error(message);
+      toast.error(error.response?.data?.message || "Có lỗi xảy ra!");
     }
   };
 
+  // 👇 Hàm đổi trang
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-700">Quản lý Xe (Bus)</h1>
+    <div className="p-2">
+      <div className="flex justify-between items-center mb-6 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Quản lý Xe (Bus)</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Quản lý thông tin các đầu xe
+          </p>
+        </div>
         <button
           onClick={handleAdd}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2 font-bold shadow"
         >
-          <span className="text-xl font-bold">+</span> Thêm xe mới
+          <span className="text-xl">+</span> Thêm xe mới
         </button>
       </div>
 
       {loading ? (
         <div className="text-center py-10">Đang tải dữ liệu...</div>
       ) : (
-        <BusTable buses={buses} onDelete={handleDelete} onEdit={handleEdit} />
+        <>
+          <BusTable buses={buses} onDelete={handleDelete} onEdit={handleEdit} />
+
+          {/* 👇 PHÂN TRANG CĂN GIỮA */}
+          <div className="mt-6 flex justify-center">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </>
       )}
 
-      {/* Modal Form */}
       <BusModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

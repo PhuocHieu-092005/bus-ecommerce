@@ -10,6 +10,7 @@ const TripTable = ({ trips, onEdit, onDelete }) => {
 
   // Format ngày giờ
   const formatDateTime = (dateString) => {
+    if (!dateString) return "";
     return new Date(dateString).toLocaleString("vi-VN", {
       hour: "2-digit",
       minute: "2-digit",
@@ -57,74 +58,92 @@ const TripTable = ({ trips, onEdit, onDelete }) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {trips.map((trip) => (
-            <tr key={trip.id} className="hover:bg-orange-50 transition-colors">
-              <td className="px-6 py-4 text-sm text-gray-500">#{trip.id}</td>
+          {/* 👇 QUAN TRỌNG: Kiểm tra mảng trước khi map để tránh lỗi crash */}
+          {Array.isArray(trips) && trips.length > 0 ? (
+            trips.map((trip) => (
+              <tr
+                key={trip.id}
+                className="hover:bg-orange-50 transition-colors"
+              >
+                <td className="px-6 py-4 text-sm text-gray-500">#{trip.id}</td>
 
-              <td className="px-6 py-4">
-                <div className="text-sm font-bold text-gray-800">
-                  {trip.route?.from_city}{" "}
-                  <span className="text-gray-400">➝</span> {trip.route?.to_city}
-                </div>
-              </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm font-bold text-gray-800">
+                    {trip.route?.from_city}{" "}
+                    <span className="text-gray-400">➝</span>{" "}
+                    {trip.route?.to_city}
+                  </div>
+                </td>
 
-              <td className="px-6 py-4">
-                <div className="text-sm text-gray-700 font-medium">
-                  {trip.bus?.bus_name}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {trip.bus?.license_plate}
-                </div>
-              </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm text-gray-700 font-medium">
+                    {trip.bus?.bus_name || "---"}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {trip.bus?.license_plate || "---"}
+                  </div>
+                </td>
 
-              <td className="px-6 py-4 text-center text-sm text-blue-600 font-medium">
-                {formatDateTime(trip.departure_time)}
-              </td>
+                <td className="px-6 py-4 text-center text-sm text-blue-600 font-medium">
+                  {formatDateTime(trip.departure_time)}
+                </td>
 
-              <td className="px-6 py-4 text-right font-bold text-orange-600">
-                {formatCurrency(trip.ticket_price)}
-              </td>
+                <td className="px-6 py-4 text-right font-bold text-orange-600">
+                  {formatCurrency(trip.ticket_price)}
+                </td>
 
-              <td className="px-6 py-4 text-center">
-                {getStatusBadge(trip.status)}
-              </td>
+                <td className="px-6 py-4 text-center">
+                  {getStatusBadge(trip.status)}
+                </td>
 
-              <td className="px-6 py-4 text-center">
-                <div className="flex justify-center gap-2">
-                  <button
-                    onClick={() => onEdit(trip)}
-                    className="text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
+                <td className="px-6 py-4 text-center">
+                  <div className="flex justify-center gap-2">
+                    <button
+                      onClick={() => onEdit(trip)}
+                      className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition"
+                      title="Chỉnh sửa"
                     >
-                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => onDelete(trip.id)}
-                    className="text-red-600 hover:bg-red-50 p-2 rounded-full"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => onDelete(trip.id)}
+                      className="text-red-600 hover:bg-red-50 p-2 rounded-full transition"
+                      title="Xóa"
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            /* 👇 Hiển thị khi không có dữ liệu */
+            <tr>
+              <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
+                {trips === null
+                  ? "Đang tải dữ liệu..."
+                  : "Chưa có chuyến xe nào được tạo."}
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

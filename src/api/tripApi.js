@@ -6,10 +6,7 @@ const tripApi = {
   // =================================================
 
   // Lấy danh sách chuyến (Admin dùng để hiển thị bảng, User dùng để lọc)
-  getAll(params) {
-    const url = "/trips";
-    return axiosClient.get(url, { params });
-  },
+  getAll: (params) => axiosClient.get("/trips", { params }),
   // Lấy chi tiết 1 chuyến xe (Admin dùng để sửa, User dùng để xem trước khi đặt)
   get(id) {
     const url = `/trips/${id}`;
