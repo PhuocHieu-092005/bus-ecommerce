@@ -60,11 +60,6 @@ const MyTicketPage = () => {
           Đã thanh toán
         </span>
       );
-    return (
-      <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
-        Chờ thanh toán
-      </span>
-    );
   };
 
   return (

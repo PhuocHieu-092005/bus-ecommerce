@@ -16,7 +16,6 @@ const SearchForm = ({ onSearch }) => {
   });
 
   // Logic lấy địa điểm
-  // --- SỬA ĐOẠN NÀY: Dùng API mới của Tâm để lấy địa điểm ---
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -25,14 +24,11 @@ const SearchForm = ({ onSearch }) => {
           routeApi.getFromCities(),
           routeApi.getToCities(),
         ]);
-
-        // API trả về mảng string trực tiếp hoặc trong data
-        setFromLocations(fromRes.data || fromRes || []);
-        setToLocations(toRes.data || toRes || []);
+        //set mảng điểm đi và về
+        setFromLocations(fromRes.data);
+        setToLocations(toRes.data);
       } catch (error) {
-        console.error(" Lỗi gọi API:", error);
-        console.error("❌ Lỗi tải địa điểm:", error);
-        // Fallback: Nếu lỗi thì để mảng rỗng hoặc dữ liệu mẫu
+        console.error(" Lỗi tải địa điểm:", error);
       }
     };
     fetchLocations();
@@ -59,14 +55,11 @@ const SearchForm = ({ onSearch }) => {
       toast.warning("Vui lòng chọn ngày về!");
       return;
     }
-    // Tạo một bản sao để chỉnh sửa
-
     // 2. Làm sạch dữ liệu
     const payload = { ...searchData };
     if (payload.trip_type === "one_way" || !payload.return_date) {
       delete payload.return_date;
     }
-
     console.log("Gói tin sạch sẽ gửi đi:", payload);
     onSearch(payload);
   };
@@ -117,9 +110,9 @@ const SearchForm = ({ onSearch }) => {
             value={searchData.from_city}
           >
             <option value="">-- Chọn nơi đi --</option>
-            {fromLocations.map((loc, index) => (
-              <option key={index} value={loc}>
-                {loc}
+            {fromLocations.map((city, index) => (
+              <option key={index} value={city}>
+                {city}
               </option>
             ))}
           </select>
@@ -137,9 +130,9 @@ const SearchForm = ({ onSearch }) => {
             value={searchData.to_city}
           >
             <option value="">-- Chọn nơi đến --</option>
-            {toLocations.map((loc, index) => (
-              <option key={index} value={loc}>
-                {loc}
+            {toLocations.map((city, index) => (
+              <option key={index} value={city}>
+                {city}
               </option>
             ))}
           </select>
