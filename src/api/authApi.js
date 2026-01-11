@@ -2,15 +2,19 @@ import axiosClient from "./axiosClient";
 
 const authApi = {
   login(data) {
-    const url = "/login"; // Đường dẫn API login của server (Tâm làm)
+    const url = "/login"; // Đường dẫn API login của server
     return axiosClient.post(url, data);
   },
   register(data) {
-    const url = "/register";
-    return axiosClient.post(url, data);
+    return axiosClient.post("/register", data);
   },
-  changePassword(data) {
-    return axiosClient.post("/change-password", data);
+  // --- SỬA DÒNG NÀY: Thêm tham số id ---
+  changePassword(id, data) {
+    return axiosClient.post(`/change-password`, data);
+  },
+  // -------------------------------------
+  resetPassword(email) {
+    return axiosClient.post("/reset-password", { email });
   },
 };
 

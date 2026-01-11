@@ -8,7 +8,6 @@ import ProtectedRoute from "../components/common/ProtectedRoute";
 import HomePage from "../pages/HomePage";
 import SchedulePage from "../pages/SchedulePage";
 import BookingPage from "../pages/BookingPage";
-import BookingSuccessPage from "../pages/BookingSuccessPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage";
 import ContactPage from "../pages/ContactPage";
 import MyTicketPage from "../pages/MyTicketPage";
@@ -20,6 +19,8 @@ import RouteManagerPage from "../pages/Admin/RouteManagerPage";
 import BookingManagerPage from "../pages/Admin/BookingManagerPage";
 import TripManagerPage from "../pages/Admin/TripManagerPage";
 import UserManagerPage from "../pages/Admin/UserManagerPage";
+import PaymentSuccess from "../pages/PaymentSuccess";
+import PaymentCancel from "../pages/PaymentCancel";
 const AppRouter = () => {
   return (
     <Routes>
@@ -83,8 +84,9 @@ const AppRouter = () => {
           </MainLayout>
         }
       />
-      {/* Trang thông báo đặt vé thành công */}
-      <Route path="/booking-success" element={<BookingSuccessPage />} />
+      {/* Trang thông báo đặt vé thành công + hủy vé */}
+      <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="/payment-cancel" element={<PaymentCancel />} />
 
       {/* 4. Các trang Login/Register (Riêng biệt - Không có Header) */}
       <Route path="/login" element={<LoginPage />} />

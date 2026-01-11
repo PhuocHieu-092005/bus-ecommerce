@@ -10,38 +10,27 @@ import BookingForm from "../components/Booking/BookingForm";
 import BookingSummary from "../components/Booking/BookingSummary";
 
 const BookingPage = () => {
-  const [searchParams] = useSearchParams();
-  const tripId = searchParams.get("tripId");
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const [searchParams] = useSearchParams(); //lấy ?tripId=id
+  const tripId = searchParams.get("tripId"); //value của id chuyến xe dc lấy từ ?tripId
+  const navigate = useNavigate(); //điều hướng bằng Link với event click
+  const { user } = useAuth(); //Custom Hook
 
-  // --- 1. STATE QUẢN LÝ DỮ LIỆU ---
-  const [trip, setTrip] = useState(null);
-  const [seats, setSeats] = useState([]);
-  const [bookedSeats, setBookedSeats] = useState([]);
-  const [pickupPoints, setPickupPoints] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // --- 1. STATE QUẢN LÝ DỮ LIỆU từ server gửi về ---
+  const [trip, setTrip] = useState(null); //id chuyến đi
+  const [seats, setSeats] = useState([]); //mảng danh sách ghế
+  const [bookedSeats, setBookedSeats] = useState([]); // danh sách ghế đã được đặt -> dùng để vô hiệu hóa ghế
+  const [pickupPoints, setPickupPoints] = useState([]); // danh sách cac điểm đón
+  const [loading, setLoading] = useState(true); // UI/UX
 
   // --- 2. STATE QUẢN LÝ LỰA CHỌN CỦA KHÁCH ---
-  const [selectedSeats, setSelectedSeats] = useState([]);
-  const [selectedPickup, setSelectedPickup] = useState("");
+  const [selectedSeats, setSelectedSeats] = useState([]); // danh sách ghế user đang chọn ['A1', 'A2']).
+  const [selectedPickup, setSelectedPickup] = useState(""); // id điểm đón từ  pickupPoints
   const [passengerInfo, setPassengerInfo] = useState({
     name: user?.full_name || "",
     phone: user?.phone || "",
     email: user?.email || "",
-    payment_method: "cash", // Mặc định là tiền mặt
+    payment_method: "banking", // Mặc định là tiền mặt
   });
-
-  // Hàm helper: Lấy dữ liệu an toàn từ API (tránh lỗi null/undefined)
-  const safeGet = (res, key) => {
-    const dataLevel1 = res?.data;
-    const dataLevel2 = res?.data?.data;
-    if (dataLevel2 && dataLevel2[key]) return dataLevel2[key];
-    if (dataLevel2 && Array.isArray(dataLevel2) && !key) return dataLevel2;
-    if (dataLevel1 && dataLevel1[key]) return dataLevel1[key];
-    if (dataLevel1 && Array.isArray(dataLevel1) && !key) return dataLevel1;
-    return [];
-  };
 
   // --- 3. GỌI API LẤY DỮ LIỆU BAN ĐẦU ---
   useEffect(() => {
@@ -52,30 +41,25 @@ const BookingPage = () => {
 
         // Lấy thông tin chuyến xe
         const tripRes = await tripApi.get(tripId);
-        const tripData = tripRes.data?.data || tripRes.data;
+        const tripData = tripRes.data;
+        console.log(tripData);
         setTrip(tripData);
-
         // Lấy sơ đồ ghế
         try {
           const seatsRes = await tripApi.getSeats(tripId);
-          const allSeats = safeGet(seatsRes, "all_seats");
-          const booked = safeGet(seatsRes, "booked_seats");
-          setSeats(
-            allSeats.length > 0 ? allSeats : seatsRes.data?.all_seats || []
-          );
+          const allSeats = seatsRes?.data.all_seats;
+          const booked = seatsRes?.data.booked_seats;
+          setSeats(allSeats.length > 0 ? allSeats : []);
           setBookedSeats(booked);
         } catch (err) {
           console.error("Lỗi lấy ghế:", err);
         }
-
         // Lấy điểm đón
-        if (tripData?.route_id) {
+        if (tripData?.route.id) {
           try {
-            const pickupRes = await tripApi.getPickupPoints(tripData.route_id);
-            const points = safeGet(pickupRes, "pickup_points");
-            setPickupPoints(
-              points.length > 0 ? points : pickupRes.data?.pickup_points || []
-            );
+            const pickupRes = await tripApi.getPickupPoints(tripData.route.id);
+            const points = pickupRes.data.pickup_points; // mảng điểm đón
+            setPickupPoints(points.length > 0 ? points : []);
           } catch (err) {
             console.error("Lỗi lấy điểm đón:", err);
           }
@@ -88,64 +72,40 @@ const BookingPage = () => {
     };
     fetchData();
   }, [tripId, user]);
+  console.log("Dữ liệu chuyến đi hiện tại:", trip); //xem data chuyến đi
 
   // --- 4. XỬ LÝ CHỌN GHẾ ---
   const handleSelectSeat = (seatNum) => {
     if (selectedSeats.includes(seatNum)) {
-      setSelectedSeats(selectedSeats.filter((s) => s !== seatNum));
+      setSelectedSeats(selectedSeats.filter((s) => s !== seatNum)); //"bỏ chọn" nếu có
     } else {
       if (selectedSeats.length >= 5)
         return toast.warning("Chỉ được chọn tối đa 5 ghế!");
       setSelectedSeats([...selectedSeats, seatNum]);
     }
   };
-
   // Tính tổng tiền
   const price = trip ? Number(trip.ticket_price) : 0;
   const totalPrice = selectedSeats.length * price;
-
-  // --- 5. XỬ LÝ ĐẶT VÉ (QUAN TRỌNG NHẤT) ---
   const handleSubmit = async () => {
     try {
       // Chuẩn bị dữ liệu gửi lên Server
       const bookingData = {
         trip_id: tripId,
-        pickup_point_id: selectedPickup,
-        seat_numbers: selectedSeats.join(","),
+        pickup_point_id: selectedPickup, //int pickup_point_id = 1
+        seat_numbers: selectedSeats.join(","), //"A1, A2"
         passenger_name: passengerInfo.name,
         passenger_phone: passengerInfo.phone,
-        payment_method: passengerInfo.payment_method,
+        payment_method: passengerInfo.payment_method, //cash | bank
       };
-
       // Gọi API tạo booking
       const res = await tripApi.createBooking(bookingData);
-
-      // Lấy dữ liệu vé trả về từ API
-      const apiBooking = res.data?.data?.booking || res.data?.data || {};
-
-      // Kết hợp dữ liệu để hiển thị bên trang in vé (đảm bảo không bị thiếu)
-      const finalBookingData = {
-        ...bookingData, // Dữ liệu khách nhập
-        ...apiBooking, // Dữ liệu server trả về (ưu tiên)
-        total_amount: totalPrice, // Đảm bảo có tổng tiền
-        booking_code: apiBooking.booking_code || "ĐANG XỬ LÝ",
-      };
-
-      // Tìm thông tin điểm đón đầy đủ (tên, địa chỉ) để hiển thị
-      const selectedPickupObj = pickupPoints.find(
-        (p) => p.id == selectedPickup
-      );
-
-      toast.success("Đặt vé thành công!");
-
-      // Chuyển hướng sang trang In Vé và gửi kèm dữ liệu
-      navigate("/booking-success", {
-        state: {
-          booking: finalBookingData,
-          tripInfo: trip,
-          pickupPoint: selectedPickupObj,
-        },
-      });
+      const checkoutUrl = res.data?.checkoutUrl;
+      if (checkoutUrl) {
+        toast.info("Đang chuyển đến trang thanh toán...");
+        // Chuyển hướng trình duyệt sang trang thanh toán của PayOS
+        window.location.href = checkoutUrl;
+      }
     } catch (error) {
       console.error(error);
       const mess = error.response?.data?.message || "Đặt vé thất bại.";
@@ -166,12 +126,11 @@ const BookingPage = () => {
     return <div className="text-center py-20">Không tìm thấy chuyến xe.</div>;
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-gray-100 py-8 mt-[50px]">
       <div className="container mx-auto px-4 max-w-6xl">
         <h1 className="text-2xl font-bold text-orange-700 mb-6 uppercase">
-          Đặt vé: {trip.route?.from_city} ➝ {trip.route?.to_city}
+          Đặt vé: {trip.route.from_city} ➝ {trip.route.to_city}
         </h1>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cột trái: Component Chọn ghế */}
           <div className="lg:col-span-2">
@@ -192,7 +151,7 @@ const BookingPage = () => {
               passengerInfo={passengerInfo}
               onInfoChange={setPassengerInfo}
             />
-
+            {/* xác nhận */}
             <BookingSummary
               selectedSeats={selectedSeats}
               totalPrice={totalPrice}

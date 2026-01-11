@@ -2,36 +2,54 @@ import React, { useEffect, useState } from "react";
 import routeApi from "../../api/routeApi";
 import RouteTable from "../../components/Admin/Route/RouteTable";
 import RouteModal from "../../components/Admin/Route/RouteModal";
+import Pagination from "../../components/common/Pagination"; // 👇 Import Pagination
 import { toast } from "react-toastify";
-import axios from "axios";
-import Pagination from "../../components/common/Pagination";
+
 const RouteManagerPage = () => {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
 
-  // --- THÊM STATE PHÂN TRANG ---
-  const [pagination, setPagination] = useState({
-    current_page: 1,
-    last_page: 1,
-    total: 0,
-  });
+  // 👇 State phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchRoutes = async () => {
+    setLoading(true);
     try {
-      const res = await routeApi.getAll();
-      setRoutes(res.data?.data || res.data || []);
+      // 👇 Truyền page vào API
+      const res = await routeApi.getAll({ page: currentPage });
+
+      let routeList = [];
+      let total = 1;
+
+      // Xử lý dữ liệu trả về (tương tự User/Trip)
+      if (res.data && Array.isArray(res.data)) {
+        routeList = res.data;
+        total = res.last_page || 1;
+      } else if (res.data?.data && Array.isArray(res.data.data)) {
+        routeList = res.data.data;
+        total = res.data.last_page || 1;
+      } else if (Array.isArray(res)) {
+        routeList = res;
+      }
+
+      setRoutes(routeList);
+      setTotalPages(total);
     } catch (error) {
+      console.error(error);
       toast.error("Lỗi tải danh sách tuyến đường");
+      setRoutes([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // 👇 Chạy lại khi currentPage thay đổi
   useEffect(() => {
     fetchRoutes();
-  }, []);
+  }, [currentPage]);
 
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa tuyến đường này?")) {
@@ -72,9 +90,13 @@ const RouteManagerPage = () => {
     }
   };
 
+  // 👇 Hàm đổi trang
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="p-2">
-      {/* Header Page đẹp hơn */}
       <div className="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
@@ -109,11 +131,22 @@ const RouteManagerPage = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
         </div>
       ) : (
-        <RouteTable
-          routes={routes}
-          onDelete={handleDelete}
-          onEdit={handleEdit}
-        />
+        <>
+          <RouteTable
+            routes={routes}
+            onDelete={handleDelete}
+            onEdit={handleEdit}
+          />
+
+          {/* 👇 PHÂN TRANG CĂN GIỮA */}
+          <div className="mt-6 flex justify-center">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </>
       )}
 
       <RouteModal
