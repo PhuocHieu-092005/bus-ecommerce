@@ -84,7 +84,7 @@ const TripCard = ({ trip }) => {
       {/* 1. CỘT TRÁI: ẢNH MINH HỌA (Chiếm 35%) */}
       <div className="md:w-[35%] h-48 md:h-full relative overflow-hidden">
         <img
-          src={trip.img_url || getTripImage()}
+          src={trip.route.img_url || getTripImage()}
           alt={trip.route?.to_city}
           className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
         />
