@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
 import authApi from "../api/authApi";
-import { useAuth } from "../contexts/AuthContext"; // Import AuthContext
 
 import bgImage from "../assets/bus-bg.png";
 
@@ -17,26 +16,17 @@ const ChangePasswordPage = () => {
   } = useForm();
 
   const navigate = useNavigate();
-  const { user } = useAuth(); // Lấy thông tin User đang đăng nhập
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
   const newPassword = watch("new_password");
 
   const onSubmit = async (data) => {
-    // Kiểm tra xem có user ID chưa
-    if (!user || !user.id) {
-      toast.error(
-        "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!"
-      );
-      return;
-    }
-
     try {
       setLoading(true);
 
       // --- SỬA ĐOẠN NÀY: Truyền user.id vào tham số đầu tiên ---
-      await authApi.changePassword(user.id, {
+      await authApi.changePassword({
         current_password: data.current_password,
         new_password: data.new_password,
       });

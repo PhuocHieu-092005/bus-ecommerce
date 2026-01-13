@@ -2,14 +2,12 @@ import axiosClient from "./axiosClient";
 
 const authApi = {
   login(data) {
-    const url = "/login"; // Đường dẫn API login của server
-    return axiosClient.post(url, data);
+    return axiosClient.post("/login", data);
   },
   register(data) {
     return axiosClient.post("/register", data);
   },
-  // --- SỬA DÒNG NÀY: Thêm tham số id ---
-  changePassword(id, data) {
+  changePassword(data) {
     return axiosClient.post(`/change-password`, data);
   },
   // -------------------------------------
