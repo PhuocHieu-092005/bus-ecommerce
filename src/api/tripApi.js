@@ -4,8 +4,6 @@ const tripApi = {
   // =================================================
   // 1. CÁC HÀM CHUNG (Dùng cho cả User & Admin)
   // =================================================
-
-  // Lấy danh sách chuyến (Admin dùng để hiển thị bảng, User dùng để lọc)
   getAll: (params) => axiosClient.get("/trips", { params }),
   // Lấy chi tiết 1 chuyến xe (Admin dùng để sửa, User dùng để xem trước khi đặt)
   get(id) {

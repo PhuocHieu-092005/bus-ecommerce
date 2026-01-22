@@ -2,8 +2,8 @@ import axios from "axios";
 
 const axiosClient = axios.create({
   // baseURL: " http://127.0.0.1:8000",
-  // baseURL: "https://alec-vicegeral-exuberantly.ngrok-free.dev",
-  baseURL: "https://hoaitam123.xyz",
+  // baseURL: "https://alec-vicegeral-exuberantly.ngrok-free.dev", public local
+  baseURL: "https://hoaitam123.xyz", // host
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -21,10 +21,7 @@ axiosClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
 
       // LOG KIỂM TRA: In ra console để xem token đã được lấy và gán chưa
-    } else {
-      console.warn("⚠️ [Axios] No token found in localStorage");
     }
-
     return config;
   },
   (error) => Promise.reject(error)

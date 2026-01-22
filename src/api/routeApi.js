@@ -1,14 +1,23 @@
 import axiosClient from "./axiosClient";
 
 const routeApi = {
-  // Đổi hết thành /routess
   getAll: (params) => axiosClient.get("/routess", { params }),
   get: (id) => axiosClient.get(`/routess/${id}`),
-  create: (data) => axiosClient.post("/routess", data),
-  update: (id, data) => axiosClient.put(`/routess/${id}`, data),
+  create: (formData) => {
+    return axiosClient.post("/routess", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  update: (id, formData) => {
+    if (formData instanceof FormData) {
+      formData.append("_method", "PUT");
+    }
+    return axiosClient.post(`/routess/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
   delete: (id) => axiosClient.delete(`/routess/${id}`),
-
-  // --- THÊM 2 HÀM MỚI ---
+  // danh sách điểm đi và đến
   getFromCities: () => axiosClient.get("/routess/from-city"),
   getToCities: () => axiosClient.get("/routess/to-city"),
 };

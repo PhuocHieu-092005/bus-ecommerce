@@ -31,22 +31,34 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   }, [isOpen, initialData, reset, setValue]);
 
   // --- HÀM XỬ LÝ DỮ LIỆU TRƯỚC KHI GỬI (FIX LỖI 500) ---
+  // RouteModal.js
+
   const handleFormSubmit = (data) => {
-    const formattedData = {
-      ...data,
-      // 1. Chuyển đổi khoảng cách: Đổi dấu phẩy thành dấu chấm, ép kiểu số thực
-      distance: data.distance
-        ? parseFloat(data.distance.toString().replace(",", "."))
-        : 0,
+    // Tạo đối tượng FormData thay vì Object thường
+    const formData = new FormData();
 
-      // 2. Chuyển đổi giá tiền: Đổi dấu phẩy thành dấu chấm, ép kiểu số thực
-      price: data.price
-        ? parseFloat(data.price.toString().replace(",", "."))
-        : 0,
-    };
+    formData.append("from_city", data.from_city);
+    formData.append("to_city", data.to_city);
 
-    // Gửi dữ liệu đã được làm sạch lên Server
-    onSubmit(formattedData);
+    // Format lại số trước khi append
+    const formattedDistance = data.distance
+      ? data.distance.toString().replace(",", ".")
+      : "0";
+    const formattedPrice = data.price
+      ? data.price.toString().replace(",", ".")
+      : "0";
+
+    formData.append("distance", formattedDistance);
+    formData.append("price", formattedPrice);
+    formData.append("duration", data.duration || "");
+
+    // QUAN TRỌNG: Lấy file từ input (nếu bạn có thêm input type="file" tên là "image")
+    if (data.image && data.image[0]) {
+      formData.append("image", data.image[0]);
+    }
+
+    // Gửi FormData này cho hàm onSubmit của trang cha
+    onSubmit(formData);
   };
   // -----------------------------------------------------
 
@@ -156,7 +168,18 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData }) => {
               </span>
             )}
           </div>
-
+          {/* Thêm vào sau phần Giá vé */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Hình ảnh tuyến đường
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              {...register("image")}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+            />
+          </div>
           {/* Footer Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <button
