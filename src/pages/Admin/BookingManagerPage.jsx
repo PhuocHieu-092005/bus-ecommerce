@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import bookingApi from "../../api/bookingApi"; // Đảm bảo bạn có file này
+import bookingApi from "../../api/bookingApi";
+import invoiceApi from "../../api/invoiceApi"; // 👇 Import API hóa đơn
 import BookingTable from "../../components/Admin/Booking/BookingTable";
 import BookingModal from "../../components/Admin/Booking/BookingModal";
-import Pagination from "../../components/common/Pagination"; // Import Pagination
+import Pagination from "../../components/common/Pagination"; // 👇 Import Pagination
 import { toast } from "react-toastify";
 
 const BookingManagerPage = () => {
@@ -11,28 +12,41 @@ const BookingManagerPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
 
-  // State phân trang
+  // 👇 State phân trang
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      // Gọi API có kèm page
+      // Gọi API kèm page
       const res = await bookingApi.getAll({ page: currentPage });
+
+      console.log("Booking Response:", res); // Debug xem cấu trúc
 
       let dataList = [];
       let total = 1;
 
-      // Xử lý dữ liệu trả về (tương tự User)
-      if (res.data && Array.isArray(res.data)) {
+      // 👇 LOGIC XỬ LÝ DỮ LIỆU THÔNG MINH (Hỗ trợ cả 2 kiểu trả về của Tâm)
+
+      // Kiểu 1: Custom Pagination ({ success: true, data: [...], pagination: {...} })
+      if (res.pagination) {
+        dataList = res.data || [];
+        total = res.pagination.last_page || 1;
+      }
+      // Kiểu 2: Laravel Default ({ current_page: 1, data: [...], last_page: 5 })
+      else if (res.data && res.last_page) {
         dataList = res.data;
-        total = res.last_page || 1;
-      } else if (res.data?.data && Array.isArray(res.data.data)) {
+        total = res.last_page;
+      }
+      // Kiểu 3: Bọc trong data ({ data: { data: [...] } })
+      else if (res.data?.data && Array.isArray(res.data.data)) {
         dataList = res.data.data;
         total = res.data.last_page || 1;
-      } else if (Array.isArray(res)) {
-        dataList = res;
+      }
+      // Kiểu 4: Không phân trang
+      else {
+        dataList = Array.isArray(res) ? res : res.data || [];
       }
 
       setBookings(dataList);
@@ -46,14 +60,16 @@ const BookingManagerPage = () => {
     }
   };
 
+  // Chạy lại khi đổi trang
   useEffect(() => {
     fetchBookings();
-  }, [currentPage]); // Chạy lại khi đổi trang
+  }, [currentPage]);
 
+  // Xử lý Xóa/Hủy vé
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn hủy vé này không?")) {
       try {
-        await bookingApi.delete(id); // Hoặc update status thành cancelled
+        await bookingApi.delete(id);
         toast.success("Đã xóa/hủy vé thành công");
         fetchBookings();
       } catch (error) {
@@ -62,11 +78,13 @@ const BookingManagerPage = () => {
     }
   };
 
+  // Mở Modal Sửa
   const handleEdit = (booking) => {
     setSelectedBooking(booking);
     setIsModalOpen(true);
   };
 
+  // Lưu thay đổi từ Modal
   const handleSave = async (formData) => {
     try {
       if (selectedBooking) {
@@ -81,16 +99,31 @@ const BookingManagerPage = () => {
     }
   };
 
-  // Hàm tải hóa đơn (nếu có)
+  // 👇 Xử lý Tải Hóa Đơn (Gọi invoiceApi)
   const handleDownloadInvoice = async (id) => {
-    // Logic tải hóa đơn (có thể mở tab mới hoặc gọi API blob)
-    // Ví dụ đơn giản: Mở link trực tiếp nếu backend hỗ trợ
-    // window.open(`http://hoaitam123.xyz/index.php/invoices/${id}`, "_blank");
+    try {
+      const response = await invoiceApi.download(id);
 
-    // Hoặc gọi API invoiceApi.download(id)
-    toast.info("Chức năng tải hóa đơn đang phát triển...");
+      // Tạo link ảo để tải file
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `invoice-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+
+      // Dọn dẹp
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Đang tải hóa đơn...");
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi tải hóa đơn (Có thể chưa thanh toán)");
+    }
   };
 
+  // Đổi trang
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -104,7 +137,6 @@ const BookingManagerPage = () => {
             Xem và cập nhật trạng thái vé của khách hàng
           </p>
         </div>
-        {/* Nút thêm vé nếu cần (thường vé do khách đặt nên ít khi admin thêm tay) */}
       </div>
 
       {loading ? (

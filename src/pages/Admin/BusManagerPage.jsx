@@ -18,21 +18,32 @@ const BusManagerPage = () => {
   const fetchBuses = async () => {
     setLoading(true);
     try {
-      // 👇 Truyền page vào API
+      // Gọi API kèm page
       const res = await busApi.getAll({ page: currentPage });
+
+      console.log("Bus Response:", res); // Debug xem trả về gì
 
       let busList = [];
       let total = 1;
 
-      // Xử lý dữ liệu trả về (tương tự các phần trước)
-      if (res.data && Array.isArray(res.data)) {
+      // 👇 LOGIC MỚI: Dựa trên cấu trúc Controller của Tâm
+      // Controller trả về: { success: true, data: [...], pagination: { last_page: 5, ... } }
+
+      if (res.pagination) {
+        // Trường hợp chuẩn theo code Tâm gửi
+        busList = res.data || [];
+        total = res.pagination.last_page || 1;
+      } else if (res.data && res.last_page) {
+        // Trường hợp Laravel mặc định (dự phòng)
         busList = res.data;
-        total = res.last_page || 1;
-      } else if (res.data?.data && Array.isArray(res.data.data)) {
+        total = res.last_page;
+      } else if (res.data?.data) {
+        // Trường hợp bọc trong data (dự phòng)
         busList = res.data.data;
         total = res.data.last_page || 1;
-      } else if (Array.isArray(res)) {
-        busList = res;
+      } else {
+        // Trường hợp không phân trang
+        busList = Array.isArray(res) ? res : res.data || [];
       }
 
       setBuses(busList);

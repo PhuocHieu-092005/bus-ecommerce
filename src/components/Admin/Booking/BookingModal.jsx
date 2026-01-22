@@ -28,7 +28,6 @@ const BookingModal = ({ isOpen, onClose, onSubmit, initialData }) => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
-          {/* Thông tin khách */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tên hành khách
@@ -48,7 +47,6 @@ const BookingModal = ({ isOpen, onClose, onSubmit, initialData }) => {
             />
           </div>
 
-          {/* Trạng thái */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

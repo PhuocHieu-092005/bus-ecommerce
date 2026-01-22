@@ -66,7 +66,7 @@ const UserModal = ({ isOpen, onClose, onSubmit, initialData }) => {
             )}
           </div>
 
-          {/* Email - ĐÃ MỞ KHÓA ĐỂ BẠN SỬA LẠI EMAIL SAI */}
+          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -76,7 +76,6 @@ const UserModal = ({ isOpen, onClose, onSubmit, initialData }) => {
               {...register("email", { required: "Nhập email" })}
               className="w-full border rounded-lg p-2"
               placeholder="email@example.com"
-              // Đã bỏ disabled để bạn sửa được email sai trong DB
             />
             {errors.email && (
               <span className="text-red-500 text-xs">
@@ -97,14 +96,13 @@ const UserModal = ({ isOpen, onClose, onSubmit, initialData }) => {
             </label>
             <input
               type="password"
-              // Thêm autoComplete để tránh trình duyệt tự điền lung tung
               autoComplete="new-password"
               {...register("password", {
                 required: !initialData && "Nhập mật khẩu",
                 minLength: {
                   value: 8,
                   message: "Mật khẩu phải ít nhất 8 ký tự",
-                }, // Validate ngay tại Frontend
+                },
               })}
               className="w-full border rounded-lg p-2"
               placeholder="••••••••"
@@ -137,10 +135,22 @@ const UserModal = ({ isOpen, onClose, onSubmit, initialData }) => {
               <select
                 {...register("role")}
                 className="w-full border rounded-lg p-2"
+                // Nếu đang sửa Admin thì khóa luôn không cho đổi xuống User
+                disabled={initialData && initialData.role === "admin"}
               >
                 <option value="user">Khách hàng (User)</option>
-                <option value="admin">Quản trị viên (Admin)</option>
+
+                {/* 👇 CHỈ HIỆN ADMIN NẾU ĐANG SỬA ADMIN CÓ SẴN */}
+                {initialData && initialData.role === "admin" && (
+                  <option value="admin">Quản trị viên (Admin)</option>
+                )}
               </select>
+
+              {initialData && initialData.role === "admin" && (
+                <p className="text-xs text-red-500 mt-1 italic">
+                  * Không thể thay đổi quyền của Admin
+                </p>
+              )}
             </div>
           </div>
 

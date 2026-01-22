@@ -1,26 +1,31 @@
-// --- THÊM Navigate VÀO DÒNG DƯỚI ĐÂY ---
 import { Routes, Route, Navigate } from "react-router-dom";
 
+// PAGES
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
-import MainLayout from "../components/Layout/MainLayout";
-import ProtectedRoute from "../components/common/ProtectedRoute";
 import HomePage from "../pages/HomePage";
 import SchedulePage from "../pages/SchedulePage";
 import BookingPage from "../pages/BookingPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage";
 import ContactPage from "../pages/ContactPage";
 import MyTicketPage from "../pages/MyTicketPage";
-// ADMIN
-import AdminLayout from "../components/Layout/AdminLayout";
-import AdminRoute from "../components/common/AdminRoute";
+import PaymentSuccess from "../pages/PaymentSuccess";
+import PaymentCancel from "../pages/PaymentCancel";
+
+// ADMIN PAGES
 import BusManagerPage from "../pages/Admin/BusManagerPage";
 import RouteManagerPage from "../pages/Admin/RouteManagerPage";
 import BookingManagerPage from "../pages/Admin/BookingManagerPage";
 import TripManagerPage from "../pages/Admin/TripManagerPage";
 import UserManagerPage from "../pages/Admin/UserManagerPage";
-import PaymentSuccess from "../pages/PaymentSuccess";
-import PaymentCancel from "../pages/PaymentCancel";
+import DashboardPage from "../pages/Admin/DashboardPage"; // 👈 QUAN TRỌNG: Import file Dashboard vào đây
+
+// LAYOUT & COMPONENTS
+import MainLayout from "../components/Layout/MainLayout";
+import AdminLayout from "../components/Layout/AdminLayout";
+import ProtectedRoute from "../components/common/ProtectedRoute";
+import AdminRoute from "../components/common/AdminRoute";
+
 const AppRouter = () => {
   return (
     <Routes>
@@ -34,7 +39,7 @@ const AppRouter = () => {
         }
       />
 
-      {/* 2. Trang Lịch trình (Công khai - Có Header) */}
+      {/* 2. Trang Lịch trình */}
       <Route
         path="/schedule"
         element={
@@ -44,7 +49,7 @@ const AppRouter = () => {
         }
       />
 
-      {/* 3. Trang Đặt vé (Bảo mật - Có Header + Phải Đăng nhập) */}
+      {/* 3. Trang Đặt vé (Bảo mật) */}
       <Route
         path="/booking"
         element={
@@ -65,7 +70,6 @@ const AppRouter = () => {
           </MainLayout>
         }
       />
-      {/* Route Vé của tôi (Cần đăng nhập) */}
       <Route
         path="/my-ticket"
         element={
@@ -84,24 +88,25 @@ const AppRouter = () => {
           </MainLayout>
         }
       />
-      {/* Trang thông báo đặt vé thành công + hủy vé */}
+
+      {/* Trang thanh toán */}
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment-cancel" element={<PaymentCancel />} />
 
-      {/* 4. Các trang Login/Register (Riêng biệt - Không có Header) */}
+      {/* 4. Login/Register */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
       {/* --- ROUTE CHO ADMIN --- */}
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
-          {/* Dòng này sẽ chạy được sau khi import Navigate */}
+          {/* Chuyển hướng mặc định về dashboard */}
           <Route index element={<Navigate to="dashboard" replace />} />
+
+          {/* 👇 SỬA DÒNG NÀY: Gọi Component DashboardPage thay vì div cứng */}
+          <Route path="dashboard" element={<DashboardPage />} />
+
           <Route path="routes" element={<RouteManagerPage />} />
-          <Route
-            path="dashboard"
-            element={<div>Trang Dashboard (Thống kê)</div>}
-          />
           <Route path="buses" element={<BusManagerPage />} />
           <Route path="trips" element={<TripManagerPage />} />
           <Route path="bookings" element={<BookingManagerPage />} />
