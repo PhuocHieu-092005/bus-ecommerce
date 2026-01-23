@@ -21,10 +21,10 @@ const BookingForm = ({
           value={selectedPickup}
           onChange={(e) => onPickupChange(e.target.value)}
         >
-          <option value="">-- Chọn điểm đón --</option>
+          <option value="">Chọn điểm đón</option>
           {pickupPoints.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.name} - {p.address}
+              {p.address}
             </option>
           ))}
         </select>

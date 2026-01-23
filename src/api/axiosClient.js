@@ -24,7 +24,7 @@ axiosClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Xử lý lỗi trả về
@@ -32,7 +32,7 @@ axiosClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosClient;
