@@ -30,17 +30,11 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     }
   }, [isOpen, initialData, reset, setValue]);
 
-  // --- HÀM XỬ LÝ DỮ LIỆU TRƯỚC KHI GỬI (FIX LỖI 500) ---
-  // RouteModal.js
-
   const handleFormSubmit = (data) => {
-    // Tạo đối tượng FormData thay vì Object thường
     const formData = new FormData();
-
     formData.append("from_city", data.from_city);
     formData.append("to_city", data.to_city);
 
-    // Format lại số trước khi append
     const formattedDistance = data.distance
       ? data.distance.toString().replace(",", ".")
       : "0";
@@ -52,12 +46,10 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     formData.append("price", formattedPrice);
     formData.append("duration", data.duration || "");
 
-    // QUAN TRỌNG: Lấy file từ input (nếu bạn có thêm input type="file" tên là "image")
     if (data.image && data.image[0]) {
       formData.append("image", data.image[0]);
     }
 
-    // Gửi FormData này cho hàm onSubmit của trang cha
     onSubmit(formData);
   };
   // -----------------------------------------------------
