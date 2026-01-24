@@ -18,7 +18,7 @@ import RouteManagerPage from "../pages/Admin/RouteManagerPage";
 import BookingManagerPage from "../pages/Admin/BookingManagerPage";
 import TripManagerPage from "../pages/Admin/TripManagerPage";
 import UserManagerPage from "../pages/Admin/UserManagerPage";
-import DashboardPage from "../pages/Admin/DashboardPage"; // 👈 QUAN TRỌNG: Import file Dashboard vào đây
+import DashboardPage from "../pages/Admin/DashboardPage";
 
 // LAYOUT & COMPONENTS
 import MainLayout from "../components/Layout/MainLayout";
