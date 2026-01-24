@@ -17,10 +17,7 @@ axiosClient.interceptors.request.use(
     const token = localStorage.getItem("token");
 
     if (token) {
-      // Gán token vào header
       config.headers.Authorization = `Bearer ${token}`;
-
-      // LOG KIỂM TRA: In ra console để xem token đã được lấy và gán chưa
     }
     return config;
   },
