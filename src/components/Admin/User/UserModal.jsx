@@ -34,6 +34,21 @@ const UserModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     }
   }, [isOpen, initialData, reset, setValue]);
 
+  // 👇 HÀM MỚI THÊM: Xử lý dữ liệu trước khi gửi đi
+  const handleFormSubmit = (data) => {
+    // Tạo bản sao để không ảnh hưởng dữ liệu gốc
+    const cleanData = { ...data };
+
+    // Nếu đang Sửa (có initialData) và password rỗng
+    if (initialData && !cleanData.password) {
+      // Xóa key password để Backend giữ nguyên mật khẩu cũ
+      delete cleanData.password;
+    }
+
+    // Gọi hàm onSubmit gốc của cha truyền vào
+    onSubmit(cleanData);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -48,7 +63,11 @@ const UserModal = ({ isOpen, onClose, onSubmit, initialData }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+        {/* 👇 SỬA Ở ĐÂY: Dùng handleFormSubmit thay vì onSubmit trực tiếp */}
+        <form
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="p-6 space-y-4"
+        >
           {/* Họ tên */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
