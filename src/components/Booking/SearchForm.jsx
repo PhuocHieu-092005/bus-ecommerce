@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import routeApi from "../../api/routeApi"; // Dùng routeApi thay vì tripApi
+import routeApi from "../../api/routeApi";
 
 const SearchForm = ({ onSearch }) => {
-  // State lưu danh sách địa điểm riêng biệt
   const [fromLocations, setFromLocations] = useState([]);
   const [toLocations, setToLocations] = useState([]);
 
@@ -15,34 +14,51 @@ const SearchForm = ({ onSearch }) => {
     trip_type: "one_way",
   });
 
-  // Logic lấy địa điểm
+  // Lấy ngày hôm nay (YYYY-MM-DD)
+  const today = new Date().toISOString().split("T")[0];
+
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        // Gọi song song 2 API lấy điểm đi và điểm đến
         const [fromRes, toRes] = await Promise.all([
           routeApi.getFromCities(),
           routeApi.getToCities(),
         ]);
-        //set mảng điểm đi và về
         setFromLocations(fromRes.data);
         setToLocations(toRes.data);
       } catch (error) {
-        console.error(" Lỗi tải địa điểm:", error);
+        console.error("Lỗi tải địa điểm:", error);
       }
     };
     fetchLocations();
   }, []);
-  // ---------------------------------------------------------
 
+  // 👇 LOGIC XỬ LÝ KHI NHẬP LIỆU (QUAN TRỌNG)
   const handleChange = (e) => {
-    setSearchData({ ...searchData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Nếu người dùng thay đổi "Ngày đi"
+    if (name === "departure_date") {
+      // Kiểm tra: Nếu Ngày về đang có giá trị VÀ Ngày về < Ngày đi mới chọn
+      // -> Thì xóa trắng Ngày về (bắt khách chọn lại)
+      if (searchData.return_date && value > searchData.return_date) {
+        setSearchData({
+          ...searchData,
+          [name]: value,
+          return_date: "", // Reset ngày về
+        });
+        toast.info("Vui lòng chọn lại ngày về phù hợp với ngày đi mới.");
+        return;
+      }
+    }
+
+    setSearchData({ ...searchData, [name]: value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // 1. Validate
+    // Validate cơ bản
     if (!searchData.from_city || !searchData.to_city) {
       toast.warning("Vui lòng chọn nơi đi và nơi đến!");
       return;
@@ -51,16 +67,26 @@ const SearchForm = ({ onSearch }) => {
       toast.warning("Vui lòng chọn ngày đi!");
       return;
     }
-    if (searchData.trip_type === "round_trip" && !searchData.return_date) {
-      toast.warning("Vui lòng chọn ngày về!");
-      return;
+
+    // Validate Khứ hồi
+    if (searchData.trip_type === "round_trip") {
+      if (!searchData.return_date) {
+        toast.warning("Vui lòng chọn ngày về!");
+        return;
+      }
+      // Kiểm tra kỹ lần cuối trước khi gửi
+      if (searchData.return_date < searchData.departure_date) {
+        toast.error("Ngày về không thể trước ngày đi!");
+        return;
+      }
     }
-    // 2. Làm sạch dữ liệu
+
+    // Làm sạch dữ liệu
     const payload = { ...searchData };
-    if (payload.trip_type === "one_way" || !payload.return_date) {
+    if (payload.trip_type === "one_way") {
       delete payload.return_date;
     }
-    console.log("Gói tin sạch sẽ gửi đi:", payload);
+
     onSearch(payload);
   };
 
@@ -98,7 +124,7 @@ const SearchForm = ({ onSearch }) => {
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mt-4"
       >
-        {/* Dropdown Điểm đi */}
+        {/* Điểm đi */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">
             Điểm đi
@@ -118,7 +144,7 @@ const SearchForm = ({ onSearch }) => {
           </select>
         </div>
 
-        {/* Dropdown Điểm đến */}
+        {/* Điểm đến */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">
             Điểm đến
@@ -146,12 +172,14 @@ const SearchForm = ({ onSearch }) => {
           <input
             type="date"
             name="departure_date"
+            min={today} // Khóa ngày quá khứ
             className="w-full border border-gray-300 p-3 rounded font-medium focus:ring-2 focus:ring-orange-400 outline-none"
             onChange={handleChange}
+            value={searchData.departure_date}
           />
         </div>
 
-        {/* Ngày về (Hiện/Ẩn) */}
+        {/* Ngày về (Logic hiển thị) */}
         {searchData.trip_type === "round_trip" ? (
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">
@@ -160,15 +188,18 @@ const SearchForm = ({ onSearch }) => {
             <input
               type="date"
               name="return_date"
+              // 👇 LOGIC KHÓA: Ngày về tối thiểu phải bằng Ngày đi (nếu đã chọn ngày đi)
+              min={searchData.departure_date || today}
               className="w-full border border-gray-300 p-3 rounded font-medium focus:ring-2 focus:ring-orange-400 outline-none"
               onChange={handleChange}
+              value={searchData.return_date}
             />
           </div>
         ) : (
-          // Nút tìm kiếm nằm ở cột cuối cùng
+          // Nút tìm kiếm (Một chiều)
           <div>
             <button
-              onClick={handleSubmit}
+              type="submit"
               className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded shadow-md transition"
             >
               TÌM CHUYẾN XE
@@ -177,7 +208,7 @@ const SearchForm = ({ onSearch }) => {
         )}
       </form>
 
-      {/* Nếu là khứ hồi thì nút tìm kiếm nằm dòng dưới */}
+      {/* Nút tìm kiếm (Khứ hồi - nằm dòng dưới) */}
       {searchData.trip_type === "round_trip" && (
         <div className="mt-4 flex justify-end">
           <button

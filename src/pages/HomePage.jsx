@@ -6,6 +6,7 @@ import Banner from "../components/Layout/Banner";
 import WhyChooseUs from "../components/Layout/WhyChooseUs";
 import { toast } from "react-toastify";
 import FilterSection from "./FilterSection";
+
 const HomePage = () => {
   const [trips, setTrips] = useState([]); // mảng data chuyến đi
   const [loading, setLoading] = useState(false); //loading
@@ -51,7 +52,7 @@ const HomePage = () => {
       if (response.data.depart_trips.length > 0) {
         setTrips(response.data.depart_trips);
         toast.success(
-          `Tìm thấy ${response.data.depart_trips.length} chuyến xe!`
+          `Tìm thấy ${response.data.depart_trips.length} chuyến xe!`,
         );
       } else {
         setTrips([]);
@@ -79,7 +80,7 @@ const HomePage = () => {
       const response = await tripApi.searchTrips(payload);
       setTrips(response.data.depart_trips);
       toast.success(
-        `Còn ${response.data.depart_trips.length} chuyến xe phù hợp!`
+        `Còn ${response.data.depart_trips.length} chuyến xe phù hợp!`,
       );
     } catch (error) {
       console.error("Lỗi filter:", error);
